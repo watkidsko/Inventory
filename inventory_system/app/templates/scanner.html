@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="scanner-container">
+    <div class="scanner-header">
+        <h2>QR Code Scanner</h2>
+        <button onclick="window.location.href='{{ url_for('main.index') }}'" class="back-button">
+            Back to Inventory
+        </button>
+    </div>
+
+    <div id="reader"></div>
+    
+    <div class="scanner-controls">
+        <button onclick="toggleScanner()" id="scannerToggle" class="control-button">
+            Start Scanner
+        </button>
+        <button onclick="toggleCamera()" id="cameraToggle" class="control-button">
+            Switch Camera
+        </button>
+    </div>
+
+    <div id="quick-actions" class="quick-actions">
+        <!-- Quick actions will be inserted here by JavaScript -->
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+{% endblock %} 

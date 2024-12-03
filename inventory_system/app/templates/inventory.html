@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="inventory-container">
+    <!-- SKU Generator Section -->
+    <div class="sku-generator">
+        <h3>Generate New SKU</h3>
+        <button onclick="generateNewSku()" class="generate-sku-btn">Generate SKU</button>
+        <div id="newSkuResult" class="sku-result"></div>
+    </div>
+
+    <!-- Scanner Input Section -->
+    <div class="scanner-input-section">
+        <h3>Scan Product</h3>
+        <form id="scanForm" onsubmit="handleScan(event)">
+            <input type="text" 
+                   id="scanInput" 
+                   name="scan_input" 
+                   placeholder="Scan Barcode/QR Code..." 
+                   autocomplete="off"
+                   autofocus>
+        </form>
+        <div id="scanResult" class="scan-result"></div>
+    </div>
+
+    <!-- Inventory Table -->
+    <div class="table-container">
+        <h3>Current Inventory</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Quantity</th>
+                    <th>Codes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.sku }}</td>
+                    <td id="quantity-{{ product.sku }}">{{ product.quantity }}</td>
+                    <td>
+                        <button onclick="generateQR('{{ product.sku }}')" class="code-btn">Generate QR</button>
+                        <button onclick="generateBarcode('{{ product.sku }}')" class="code-btn">Generate Barcode</button>
+                        <div id="qr-{{ product.sku }}" class="code-display"></div>
+                        <div id="barcode-{{ product.sku }}" class="code-display"></div>
+                    </td>
+                    <td>
+                        <button onclick="updateStock('{{ product.sku }}', 'add')" class="add-btn">+</button>
+                        <button onclick="updateStock('{{ product.sku }}', 'remove')" class="remove-btn">-</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add some additional CSS -->
+<style>
+.table-container {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table-container h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.scanner-input-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.sku-generator h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+</style>
+
+<script>
+async function handleScan(event) {
+    event.preventDefault();
+    const input = document.getElementById('scanInput');
+    const sku = input.value;
+    input.value = ''; // Clear input for next scan
+    
+    try {
+        const response = await fetch('/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'scan_input': sku
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Play success sound
+            new Audio('/static/sounds/beep.mp3').play();
+            
+            // Show quick actions
+            const resultDiv = document.getElementById('scanResult');
+            resultDiv.innerHTML = `
+                <div class="scan-success">
+                    <h3>${data.product.name}</h3>
+                    <p>SKU: ${data.product.sku}</p>
+                    <p>Current Quantity: ${data.product.quantity}</p>
+                    <div class="quick-actions">
+                        <button onclick="updateStock('${data.product.sku}', 'add')" class="add-btn">Add One (+1)</button>
+                        <button onclick="updateStock('${data.product.sku}', 'remove')" class="remove-btn">Remove One (-1)</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Play error sound
+            new Audio('/static/sounds/error.mp3').play();
+            
+            document.getElementById('scanResult').innerHTML = `
+                <div class="scan-error">Product not found</div>
+            `;
+        }
+    } catch (error) {
+        console.error('Scan error:', error);
+        document.getElementById('scanResult').innerHTML = `
+            <div class="scan-error">Error scanning product</div>
+        `;
+    }
+}
+</script>
+{% endblock %} 

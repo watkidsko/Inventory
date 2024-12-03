@@ -1,0 +1,8 @@
+flask>=2.3.3
+flask-sqlalchemy>=3.1.1
+qrcode>=7.4.2
+pillow
+python-dotenv>=1.0.0
+selenium>=4.0.0
+python-barcode>=0.15.1
+gunicorn>=21.2.0

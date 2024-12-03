@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <h2>Connect to eBay</h2>
+    <p>To use this inventory management system, you need to connect your eBay account.</p>
+    <a href="{{ url_for('main.connect_ebay') }}" class="ebay-login-button">
+        Connect with eBay
+    </a>
+</div>
+{% endblock %} 
